@@ -4,7 +4,9 @@ import pyautogui
 import mss
 import ctypes
 import logging
-import datetime  # Import the datetime module for timestamps
+import datetime
+import tkinter as tk
+from tkinter.scrolledtext import ScrolledText
 
 # Define constants for different states of the program
 RESET = 0
@@ -37,6 +39,22 @@ for i, template_path in enumerate(['1.png', '2.png', '3.png']):
 # Set up logging with timestamps
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# Create a Tkinter window for logging
+root = tk.Tk()
+root.title("Log Window")
+root.attributes("-topmost", True)  # Always on top
+
+# Create a scrolled text widget for logging
+log_text = ScrolledText(root, state="disabled", wrap=tk.WORD)
+log_text.pack(expand=True, fill="both")
+
+# Function to append logs to the text widget
+def append_log(message):
+    log_text.configure(state="normal")
+    log_text.insert(tk.END, message + "\n")
+    log_text.configure(state="disabled")
+    log_text.yview(tk.END)  # Auto-scroll to the bottom
+
 # Main loop
 while True:
     # Get a screenshot of the zone and convert it to HSV color space
@@ -63,20 +81,27 @@ while True:
             found = len(loc[0])
             if found > 0:
                 number = i + 1
-                logging.debug(f"Template {i + 1} found.")
+                log_message = f"Template {i + 1} found."
+                logging.debug(log_message)
+                append_log(log_message)
         prev_area = area
 
     # Update the state based on the area of the target bar
     if state == FOUND and area / starting_area <= 0.9:
-        logging.debug("Target bar is shrinking. Changing state to INTERCEPTION.")
+        log_message = "Target bar is shrinking. Changing state to INTERCEPTION."
+        logging.debug(log_message)
+        append_log(log_message)
         state = INTERCEPTION
     elif state == RESET and area > 0:
-        logging.debug(f" ")
-        logging.debug("Target bar has appeared. Changing state to FOUND.")
+        log_message = "Target bar has appeared. Changing state to FOUND."
+        logging.debug(log_message)
+        append_log(log_message)
         state = FOUND
         starting_area = area
     elif area == 0 and (state == FOUND or state == INTERCEPTION):
-        logging.debug("Target bar has disappeared. Changing state to RESET.")
+        log_message = "Target bar has disappeared. Changing state to RESET.\n"
+        logging.debug(log_message)
+        append_log(log_message)
         state = RESET
         starting_area = 0
 
@@ -91,9 +116,14 @@ while True:
             key = "e"
         else:
             key = "0"
-        logging.debug(f"Pressing key {key}. Changing state to RESET.")
-        logging.debug(f" ")
+        log_message = f"Pressing key {key}. Changing state to RESET.\n"
+        logging.debug(log_message)
+        append_log(log_message)
         pyautogui.press(f'{key}')
         state = RESET
         number = 0
         key = "0"
+
+    # Update the Tkinter window
+    root.update_idletasks()
+    root.update()
