@@ -17,7 +17,7 @@ def hsv_calc(): # Define a function that calculates the HSV values for a given i
     cv2.createTrackbar("uv","Trackbars",255,255,nothing) # Create a trackbar for the upper value value
     while True: 
         # Read lockpick template from a file. If using against a game that looks different; Take a screen shot and replace this image.
-        frame = cv2.imread(r'screens\RPGen\lockpickminigame.png') 
+        frame = cv2.imread(r'screens\lpgame.png') 
         hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV) # Convert the image from BGR to HSV color space
         
         lh = cv2.getTrackbarPos("lh","Trackbars") # Get the lower hue value from the trackbar
